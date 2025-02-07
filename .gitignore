@@ -1,2 +1,8 @@
 ﻿app/__pycache__
 docker/data
+test
+app/common/__pycache__
+app/log
+app/model/__pycache__
+app/utils/__pycache__
+app/views/__pycache__
