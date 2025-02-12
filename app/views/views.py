@@ -8,7 +8,7 @@ from app.utils.logger import logger
 
 router = APIRouter()
 
-network_interface = "eth0"
+network_interface = "wlan0"
 
 class TC(BaseModel):
     rate: Optional[str] = None
