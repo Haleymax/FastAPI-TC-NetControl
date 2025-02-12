@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import Optional
-
+from app.model.models import TC
 from app.common.check_format import check_tc_params
 from app.utils.TrafficControl import TrafficControl
 from app.utils.logger import logger
@@ -21,9 +21,7 @@ async def tc(tc_data: TC):
     if result:
         logger.info(message)
         logger.info(f"带宽为 {tc_data.rate}")
-        logger.info(f"延迟为 {tc_data.delay}")
         logger.info(f"丢包率为 {tc_data.loss}")
-        logger.info(f"IP 地址为 {tc_data.ip_address}")
 
         try:
             tc = TrafficControl(network_interface)
