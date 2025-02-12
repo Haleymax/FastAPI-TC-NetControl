@@ -10,21 +10,9 @@ class TrafficControl:
             # 清除现有的 tc 配置
             self.clear_tc()
 
-            # 设置延迟
-            if delay:
-                self.set_delay(delay)
+            self.set_network(rate=rate, loss=loss)
 
-            # 设置丢包率
-            if loss:
-                self.set_loss(loss)
-
-            # 设置带宽限制
-            if rate:
-                self.set_rate(rate)
-
-            # 设置 IP 地址的过滤器
-            if ip_address:
-                self.set_ip_filter(ip_address)
+            
 
         except Exception as e:
             logger.error(f"Failed to setup traffic control: {e}")
@@ -32,42 +20,37 @@ class TrafficControl:
 
     def clear_tc(self):
         try:
-            subprocess.run(["sudo", "tc", "qdisc", "del", "dev", self.interface, "root"], check=True)
-            logger.info(f"Cleared existing tc configuration on {self.interface}")
+            # 检查当前的 qdisc 配置
+            result = subprocess.run(
+                ["sudo", "tc", "-s", "qdisc", "show", "dev", self.interface],
+                capture_output=True,
+                text=True
+            )
+            logger.info(f"execute result : {result.stdout}")
         except subprocess.CalledProcessError as e:
             logger.error(f"Failed to clear tc configuration: {e}")
             raise
-
-    def set_delay(self, delay):
-        try:
-            subprocess.run(["sudo", "tc", "qdisc", "add", "dev", self.interface, "root", "netem", "delay", f"{delay}ms"], check=True)
-            logger.info(f"Set delay to {delay}ms on {self.interface}")
-        except subprocess.CalledProcessError as e:
-            logger.error(f"Failed to set delay: {e}")
+        except Exception as e:
+            logger.error(f"An unexpected error occurred: {e}")
             raise
+ 
+    def set_network(self, rate="512Kbit", loss = 0):
+        result = []
+        commands = [
+            f"sudo tc qdisc add dev {self.interface} root handle 1: htb default 10",
+            f"sudo tc class add dev {self.interface} parent 1: classid 1:1 htb rate {rate}",
+            f"sudo tc class add dev {self.interface} parent 1:1 classid 1:10 htb rate {rate}"
+            f"sudo tc class add dev {self.interface} parent 1:10 handle 10: netem loss {loss}%"
+        ]
+        for command in commands:
+            try:
+                result = subprocess.run(command, shell=True, capture_output=True, text=True, check=True)
+                print(f"命令 {command} 执行成功，输出：{result.stdout}")
+                result.append(result.stdout)
+            except subprocess.CalledProcessError as e:
+                print(f"命令 {command} 执行失败，错误信息：{e.stderr}")
+                result.append(result.stderr)
+        
+        return result
+    
 
-    def set_loss(self, loss):
-        try:
-            subprocess.run(["sudo", "tc", "qdisc", "change", "dev", self.interface, "root", "netem", "loss", f"{loss}%"], check=True)
-            logger.info(f"Set loss to {loss}% on {self.interface}")
-        except subprocess.CalledProcessError as e:
-            logger.error(f"Failed to set loss: {e}")
-            raise
-
-    def set_rate(self, rate):
-        try:
-            subprocess.run(["sudo", "tc", "qdisc", "add", "dev", self.interface, "root", "tbf", "rate", rate, "burst", "32kbit", "latency", "400ms"], check=True)
-            logger.info(f"Set rate to {rate} on {self.interface}")
-        except subprocess.CalledProcessError as e:
-            logger.error(f"Failed to set rate: {e}")
-            raise
-
-    def set_ip_filter(self, ip_address):
-        try:
-            # 添加过滤器以限制特定 IP 地址的流量
-            subprocess.run(["sudo", "tc", "filter", "add", "dev", self.interface, "protocol", "ip", "parent", "1:", "prio", "1",
-                            "u32", f"match ip dst {ip_address} flowid 1:1"], check=True)
-            logger.info(f"Set IP filter for {ip_address} on {self.interface}")
-        except subprocess.CalledProcessError as e:
-            logger.error(f"Failed to set IP filter: {e}")
-            raise

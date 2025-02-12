@@ -10,12 +10,6 @@ router = APIRouter()
 
 network_interface = "wlan0"
 
-class TC(BaseModel):
-    rate: Optional[str] = None
-    delay: Optional[int] = None
-    loss: Optional[float] = None
-    ip_address: str  # 新增 IP 地址字段
-
 @router.get("/hello")
 def index():
     return {"message": "Hello World"}
@@ -33,7 +27,9 @@ async def tc(tc_data: TC):
 
         try:
             tc = TrafficControl(network_interface)
-            tc.setup_tc(tc_data.rate, tc_data.delay, tc_data.loss, tc_data.ip_address)  # 传递 IP 地址
+            result = tc.setup_tc(tc_data.rate, tc_data.loss)
+            for ret in result:
+                logger.info(f"result is : {ret}")
             res_msg["result"] = True
             res_msg["message"] = "切换成功"
         except Exception as e:

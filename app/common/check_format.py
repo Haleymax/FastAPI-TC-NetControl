@@ -9,10 +9,6 @@ def check_tc_params(tc: TC):
     if not rate_pattern.match(tc.rate):
         return False, "rate 必须是一个非负数字，可后跟 'bps'、'kbps'、'Mbps'、'Gbps' 或 'Tbps' 单位"
 
-    # 检查 delay 是否为非负整数
-    if tc.delay < 0:
-        return False, "delay 必须是一个非负整数"
-
     # 检查 loss 是否在 0 到 100 之间
     if tc.loss < 0 or tc.loss > 100:
         return False, "loss 必须是一个介于 0 到 100 之间的整数"

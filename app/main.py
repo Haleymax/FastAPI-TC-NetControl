@@ -2,7 +2,7 @@ from fastapi import FastAPI
 import uvicorn
 from starlette.responses import HTMLResponse
 
-from views import views
+from app.views import views
 
 app = FastAPI()
 app.include_router(views.router)
@@ -19,9 +19,3 @@ def read_item(item_id: int, q: str = None):
 
 def execute():
     uvicorn.run(app, host="0.0.0.0", port=8000)
-
-execute()
-
-if __name__ == "__main__":
-
-    uvicorn.run(app, host="127.0.0.1", port=8000)
