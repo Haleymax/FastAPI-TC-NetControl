@@ -18,4 +18,4 @@ def read_item(item_id: int, q: str = None):
 
 
 def execute():
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8008)
