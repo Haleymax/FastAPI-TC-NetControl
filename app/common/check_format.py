@@ -1,18 +1,24 @@
 import re
+# 验证IP地址格式
+import ipaddress
 
 from app.model.models import TC
 
 
 def check_tc_params(tc: TC):
-    rate_pattern = re.compile(r'^\d+([bkmgt]bps)?$', re.IGNORECASE)
-    if not rate_pattern.match(tc.rate):
-        return False, "rate 必须是一个非负数字，可后跟 'bps'、'kbps'、'Mbps'、'Gbps' 或 'Tbps' 单位"
-
-    # 检查 loss 是否在 0 到 100 之间
-    if tc.loss < 0 or tc.loss > 100:
-        return False, "loss 必须是一个介于 0 到 100 之间的整数"
-
-    return True, "参数合规"
+    # 验证 loss 是否为数字且在 0 到 100 之间
+    if not isinstance(tc.loss, (int, float)) or not 0 <= tc.loss <= 100:
+        raise ValueError("Loss must be 0-100")
+    
+    # 验证速率格式
+    if not isinstance(tc.rate, str) or not tc.rate.lower().endswith(("bit", "bps")):
+        raise ValueError("Invalid rate format (e.g. 10Mbit)")
+    
+    # 验证 IP 地址格式
+    try:
+        ipaddress.ip_address(tc.ipaddr)
+    except ValueError:
+        raise ValueError("Invalid IP address format")
 
 
 if __name__ == "__main__":

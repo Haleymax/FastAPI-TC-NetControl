@@ -25,11 +25,9 @@ async def tc(tc_data: TC):
 
         try:
             tc = TrafficControl(network_interface)
-            result = tc.setup_tc(tc_data.rate, tc_data.loss)
-            # for ret in result:
-            #     logger.info(f"result is : {ret}")
-            # res_msg["result"] = True
-            # res_msg["message"] = "切换成功"
+            result = tc.set_network(tc_data.rate, tc_data.loss, tc_data.ipaddr)
+            res_msg["result"] = True
+            res_msg["message"] = result
         except Exception as e:
             logger.error(f"Traffic control setup failed: {e}")
             raise HTTPException(status_code=500, detail=f"Traffic control setup failed: {e}")
