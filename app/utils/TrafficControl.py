@@ -33,7 +33,7 @@ class TrafficControl:
         try:
             # 清除现有的 tc 配置
             subprocess.run(
-                ["tcdel", self.interface, "--all"],
+                ["sudo", "tcdel", self.interface, "--all"],
                 capture_output=True,
                 text=True,
                 check=True
@@ -47,8 +47,10 @@ class TrafficControl:
             # raise
 
     def set_network(self, rate="512Kbit", loss=0, ipaddr="127.0.0.1"):
+        self.clear_tc()
         # 合并为一个命令同时设置 rate 和 loss
         command = [
+            "sudo",
             "tcset", self.interface,
             "--rate", rate,
             "--loss", str(loss),

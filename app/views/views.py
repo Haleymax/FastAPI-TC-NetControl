@@ -1,9 +1,11 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import Optional
-from check_tc_params import check_tc_params
+from app.common.check_format import check_tc_params
 from app.utils.TrafficControl import TrafficControl
 from app.utils.logger import logger
+from app.model.models import TC 
+
 router = APIRouter()
 network_interface = "wlan0"
 
