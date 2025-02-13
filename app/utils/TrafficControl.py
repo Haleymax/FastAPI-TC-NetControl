@@ -7,23 +7,33 @@ class TrafficControl:
     def __init__(self, interface):
         self.interface = interface
 
-    def setup_tc(self, rate, loss):
+    def clear_tc(self):
         try:
-            # 清除现有的 tc 配置
-            self.clear_tc()
-
-            # 设置新的 tc 配置
-            self.set_network(rate=rate, loss=loss)
-
-        except Exception as e:
-            logger.error(f"Failed to setup traffic control: {e}")
+            subprocess.run(
+                ["tcdel", self.interface, "--all"],
+                capture_output=True,
+                text=True,
+                check=True
+            )
+            logger.info(f"Cleared tc on {self.interface}")
+        except subprocess.CalledProcessError as e:
+            error_msg = f"Clear tc failed: {e.stderr}"
+            if "No such device" in error_msg:
+                logger.error(f"Invalid interface: {self.interface}")
+            elif "No qdisc" in error_msg:
+                logger.warning("No existing configuration")
+            else:
+                logger.error(error_msg)
+            raise  # 重新抛出异常让上层处理
+        except FileNotFoundError:
+            logger.error("tc command not found! Install iproute2")
             raise
 
     def clear_tc(self):
         try:
             # 清除现有的 tc 配置
             subprocess.run(
-                ["sudo", "tc", "qdisc", "del", "dev", self.interface, "root"],
+                ["sudo", "tcdel", self.interface, "--all"],
                 capture_output=True,
                 text=True,
                 check=True
@@ -36,24 +46,40 @@ class TrafficControl:
             logger.error(f"An unexpected error occurred: {e}")
             # raise
 
-    def set_network(self, rate="512Kbit", loss=0):
-        results = []
-        commands = [
-            f"sudo tc qdisc add dev {self.interface} root handle 1: htb default 10",
-            f"sudo tc class add dev {self.interface} parent 1: classid 1:1 htb rate {rate}",
-            f"sudo tc class add dev {self.interface} parent 1:1 classid 1:10 htb rate {rate}",
-            f"sudo tc qdisc add dev {self.interface} parent 1:10 handle 10: netem loss {loss}%"
+    def set_network(self, rate="512Kbit", loss=0, ipaddr="127.0.0.1"):
+        self.clear_tc()
+        # 合并为一个命令同时设置 rate 和 loss
+        command = [
+            "sudo",
+            "tcset", self.interface,
+            "--rate", rate,
+            "--loss", str(loss),
+            "--network", ipaddr
         ]
-        for command in commands:
-            try:
-                result = subprocess.run(command, shell=True, capture_output=True, text=True, check=True)
-                results.append(result.stdout)
-                logger.info(f"Command executed successfully: {command}")
-            except subprocess.CalledProcessError as e:
-                logger.error(f"Command failed: {command}, Error: {e.stderr}")
-                raise
-            except Exception as e:
-                logger.error(f"An unexpected error occurred: {e}")
-                raise
+        try:
+            result = subprocess.run(
+                command,
+                capture_output=True,
+                text=True,
+                check=True
+            )
+            logger.info(f"Network configured: {command}")
+        except subprocess.CalledProcessError as e:
+            logger.error(f"Command failed: {e.cmd}\nError: {e.stderr}")
+            raise
+        except Exception as e:
+            logger.error(f"Unexpected error: {e}")
+            raise
 
-        return results
+        # 查看配置
+        try:
+            result = subprocess.run(
+                ["tcshow", self.interface],
+                capture_output=True,
+                text=True,
+                check=True
+            )
+            return result.stdout
+        except subprocess.CalledProcessError as e:
+            logger.warning(f"Failed to verify config: {e.stderr}")
+            return ""   
