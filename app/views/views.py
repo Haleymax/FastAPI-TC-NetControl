@@ -1,6 +1,4 @@
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
-from typing import Optional
 from app.common.check_format import check_tc_params
 from app.utils.TrafficControl import TrafficControl
 from app.utils.logger import logger
