@@ -2,10 +2,10 @@ import re
 
 import ipaddress
 
-from app.model.models import TC
+from app.model.models import Base
 
 
-def check_tc_params(tc: TC):
+def check_tc_params(tc: Base):
     if not isinstance(tc.loss, (int, float)) or not 0 <= tc.loss <= 100:
         return False, "Loss must be 0-100"
 
