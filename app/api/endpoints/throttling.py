@@ -4,12 +4,12 @@ from app.core.settings import network_interface
 from app.utils.validation import check_tc_params
 from app.utils.TrafficControl import TrafficControl
 from app.utils.logger import logger
-from app.model.models import TC
+from app.model.models import Base
 
 tc_router = APIRouter()
 
 @tc_router.post("/tc/add")
-async def add(tc_data: TC):
+async def add(tc_data: Base):
     res_msg = {}
     result, message = check_tc_params(tc_data)
     if result:

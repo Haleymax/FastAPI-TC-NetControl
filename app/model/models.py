@@ -1,6 +1,10 @@
 from pydantic import BaseModel
 
-class TC(BaseModel):
+class Base(BaseModel):
     rate: str
     loss: int
     ipaddr: str
+
+class TC(BaseModel):
+    incoming: Base
+    outgoing: Base

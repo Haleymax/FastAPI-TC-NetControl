@@ -1,7 +1,7 @@
 import subprocess
-import logging
 
-logger = logging.getLogger(__name__)
+from app.utils.logger import logger
+
 
 class TrafficControl:
     def __init__(self, interface):
@@ -9,12 +9,12 @@ class TrafficControl:
 
     def clear_tc(self):
         try:
-            subprocess.run(
-                ["sudo", "tcdel", self.interface, "--all"],
-                capture_output=True,
-                text=True,
-                check=True
-            )
+            # subprocess.run(
+            #     ["sudo", "tcdel", self.interface, "--all"],
+            #     capture_output=True,
+            #     text=True,
+            #     check=True
+            # )
             logger.info(f"Cleared tc configuration on interface {self.interface}")
         except subprocess.CalledProcessError as e:
             logger.error(f"Failed to clear tc configuration: {e}")
@@ -32,12 +32,12 @@ class TrafficControl:
             "--network", ipaddr
         ]
         try:
-            result = subprocess.run(
-                command,
-                capture_output=True,
-                text=True,
-                check=True
-            )
+            # result = subprocess.run(
+            #     command,
+            #     capture_output=True,
+            #     text=True,
+            #     check=True
+            # )
             logger.info(f"Network configured: {command}")
         except subprocess.CalledProcessError as e:
             logger.error(f"Command failed: {e.cmd}\nError: {e.stderr}")
