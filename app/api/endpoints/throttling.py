@@ -4,12 +4,22 @@ from app.core.settings import network_interface
 from app.utils.validation import check_tc_params
 from app.utils.TrafficControl import TrafficControl
 from app.utils.logger import logger
-from app.model.models import Base
+from app.model.models import Base, TC
 
 tc_router = APIRouter()
 
 @tc_router.post("/tc/add")
-async def add(tc_data: Base):
+async def add(tc_data: TC):
+    res_msg = {}
+    return res_msg
+
+@tc_router.post("/tc/remove")
+async def remove(tc_data: TC):
+    res_msg = {}
+    return res_msg
+
+@tc_router.post("/tc")
+async def base_api(tc_data: Base):
     res_msg = {}
     result, message = check_tc_params(tc_data)
     if result:
@@ -28,7 +38,3 @@ async def add(tc_data: Base):
         res_msg["result"] = False
         res_msg["message"] = message
     return res_msg
-
-@tc_router.post("/tc/remove")
-async def remove(tc_data: TC):
-    res_msg = {}
