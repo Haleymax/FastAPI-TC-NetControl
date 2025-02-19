@@ -8,7 +8,6 @@ class TrafficControl:
         self.interface = interface
 
     def clear_tc(self, device):
-        output = None
         try:
             if device is None:
                 command = ["tcdel", self.interface, "--all"]
@@ -37,7 +36,7 @@ class TrafficControl:
             logger.error(f"An unexpected error occurred: {e}")
             raise
         finally:
-            return output
+            return self.show_tc_config()
 
     def set_network(self, rate="512Kbit", loss=0, ipaddr="127.0.0.1"):
         output = None
@@ -63,15 +62,21 @@ class TrafficControl:
         except Exception as e:
             logger.error(f"Unexpected error: {e}")
             raise
+        finally:
+            return self.show_tc_config()
+
+    def show_tc_config(self):
         try:
+            command = ["tcshow", self.interface]
             process_result = subprocess.run(
-                ["tcshow", self.interface],
+                command,
                 capture_output=True,
                 text=True,
                 check=True
             )
             output = process_result.stdout
-        except subprocess.CalledProcessError as e:
-            logger.warning(f"Failed to verify config: {e.stderr}")
-        finally:
+            logger.info(f"TC configuration on interface {self.interface} result is {output}")
             return output
+        except subprocess.CalledProcessError as e:
+            logger.info(f"faild show tc config on interface {self.interface} as {e}")
+            return e.output
