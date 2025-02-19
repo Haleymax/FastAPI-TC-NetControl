@@ -21,7 +21,8 @@ async def remove(device: str = Query(None, description="device ip address")) :
         tc_client = TrafficControl(NETWORK_INTERFACE)
         result = tc_client.clear_tc(device)
         res_msg["success"] = True
-        res_msg["msg"] = result
+        res_msg["interface"] = tc_client.interface
+        res_msg["message"] = result
         return res_msg
     except Exception as e:
         logger.error(f"Traffic control setup failed: {e}")
@@ -40,6 +41,7 @@ async def base_api(tc_data: Base):
             tc_client = TrafficControl(NETWORK_INTERFACE)
             result = tc_client.set_network(tc_data.rate, tc_data.loss, tc_data.ipaddr)
             res_msg["result"] = True
+            res_msg["interface"] = tc_client.interface
             res_msg["message"] = result
         except Exception as e:
             logger.error(f"Traffic control setup failed: {e}")
