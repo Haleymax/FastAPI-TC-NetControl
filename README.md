@@ -103,3 +103,19 @@ except requests.RequestException as e:
     print(f"请求发生错误: {e}")
 ```
 > 通过发送 post 请求将将弱网参数的数据发送过去
+
+4. 所有接口的返回数据类型一致，均为现网卡的配置信息
+```json
+{
+  "success": true,
+  "interface": "wlo1",
+  "message": {
+    "wlo1": {
+      "outgoing": {
+      },
+      "incoming": {
+      }
+    }
+  }
+}
+```

@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, Query
 
 from app.core.settings import NETWORK_INTERFACE
+from app.utils.generate_template import generate_network_interface_html
 from app.utils.validation import check_tc_params
 from app.utils.TrafficControl import TrafficControl
 from app.utils.logger import logger
@@ -50,3 +51,9 @@ async def base_api(tc_data: Base):
         res_msg["result"] = False
         res_msg["message"] = message
     return res_msg
+
+@tc_router.get("/tc/show")
+async def show():
+    tc_client = TrafficControl(NETWORK_INTERFACE)
+    data = tc_client.show_tc_config()
+    return generate_network_interface_html(data)
