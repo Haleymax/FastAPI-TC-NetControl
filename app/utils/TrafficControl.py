@@ -7,52 +7,76 @@ class TrafficControl:
     def __init__(self, interface):
         self.interface = interface
 
-    def clear_tc(self):
+    def clear_tc(self, device):
         try:
-            # subprocess.run(
-            #     ["sudo", "tcdel", self.interface, "--all"],
-            #     capture_output=True,
-            #     text=True,
-            #     check=True
-            # )
-            logger.info(f"Cleared tc configuration on interface {self.interface}")
+            if device is None:
+                command = ["tcdel", self.interface, "--all"]
+                process_result = subprocess.run(
+                    command,
+                    capture_output=True,
+                    text=True,
+                    check=True
+                )
+                output = process_result.stdout
+                logger.info(f"Cleared tc configuration on interface {self.interface}, result is {output}")
+            else:
+                command = ["tcdel", self.interface, "--dst-network", device]
+                process_result = subprocess.run(
+                    command,
+                    capture_output=True,
+                    text=True,
+                    check=True
+                )
+                output = process_result.stdout
+                logger.info(f"Cleared tc configuration on device {device}, result is {output}")
         except subprocess.CalledProcessError as e:
             logger.error(f"Failed to clear tc configuration: {e}")
-            # raise
+            raise
         except Exception as e:
             logger.error(f"An unexpected error occurred: {e}")
-            # raise
+            raise
+        finally:
+            return self.show_tc_config()
 
     def set_network(self, rate="512Kbit", loss=0, ipaddr="127.0.0.1"):
-        self.clear_tc()
-        command = [
-            "tcset", self.interface,
-            "--rate", rate,
-            "--loss", str(loss),
-            "--network", ipaddr
-        ]
+        output = None
         try:
-            # result = subprocess.run(
-            #     command,
-            #     capture_output=True,
-            #     text=True,
-            #     check=True
-            # )
+            command = [
+                "tcset", self.interface,
+                "--rate", rate,
+                "--loss", str(loss),
+                "--network", ipaddr,
+                "--add"
+            ]
+            process_result = subprocess.run(
+                command,
+                capture_output=True,
+                text=True,
+                check=True
+            )
             logger.info(f"Network configured: {command}")
+            logger.info(process_result.stdout)
         except subprocess.CalledProcessError as e:
             logger.error(f"Command failed: {e.cmd}\nError: {e.stderr}")
             raise
         except Exception as e:
             logger.error(f"Unexpected error: {e}")
             raise
+        finally:
+            return self.show_tc_config()
+
+    def show_tc_config(self):
         try:
-            result = subprocess.run(
-                ["tcshow", self.interface],
+            command = ["tcshow", self.interface]
+            process_result = subprocess.run(
+                command,
                 capture_output=True,
                 text=True,
                 check=True
             )
-            return result.stdout
+            output = process_result.stdout
+            logger.info(f"TC configuration on interface {self.interface} result is {output}")
+            return output
         except subprocess.CalledProcessError as e:
-            logger.warning(f"Failed to verify config: {e.stderr}")
-            return ""   
+            logger.info(f"faild show tc config on interface {self.interface} as {e}")
+            return e.output
