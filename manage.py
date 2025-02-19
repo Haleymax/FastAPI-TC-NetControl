@@ -1,6 +1,6 @@
 import argparse
 
-from app.core.settings import get_config
+from app.core.settings import get_server_config
 from app.main import start
 from app.utils.logger import logger
 
@@ -13,7 +13,7 @@ def parse_arguments():
 
 def main():
     args = parse_arguments()
-    start_host, start_port = get_config()
+    start_host, start_port = get_server_config()
 
     host =args.host or start_host
     port =args.port or start_port
