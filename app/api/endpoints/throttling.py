@@ -54,6 +54,7 @@ async def remove(device: str = Query(None, description="device ip address"), red
         res_msg["result"] = True
         res_msg["interface"] = tc_client.interface
         res_msg["message"] = result
+        redis_client.lpop(REDIS_HOST_KEY, device)
         return res_msg
     except Exception as e:
         logger.error(f"Traffic control setup failed: {e}")
@@ -80,7 +81,7 @@ async def base_api(tc_data: Base, redis_client: redis.Redis= Depends(get_redis_c
             res_msg["result"] = True
             res_msg["interface"] = tc_client.interface
             res_msg["message"] = result
-            await redis_client.lpush(REDIS_HOST_KEY, tc_data.rate)
+            redis_client.lpush(REDIS_HOST_KEY, tc_data.rate)
         except Exception as e:
             logger.error(f"Traffic control setup failed: {e}")
             raise HTTPException(status_code=500, detail=f"Traffic control setup failed: {e}")
