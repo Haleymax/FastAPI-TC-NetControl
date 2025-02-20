@@ -1,5 +1,3 @@
-import re
-
 import ipaddress
 
 from app.model.models import Base
@@ -18,4 +16,10 @@ def check_tc_params(tc: Base):
     
     return True, "Parameters are valid"
 
+def check_ip_address(ip: str):
+    try:
+        ipaddress.IPv4Address(ip)
+        return True
+    except ValueError:
+        return False
 
