@@ -33,7 +33,7 @@ async def remove(device: str = Query(None, description="device ip address"), red
 
     try:
         tc_client = TrafficControl(NETWORK_INTERFACE)
-        if device and check_ip_address(device):
+        if device and not check_ip_address(device):
                 res_msg['result'] = False
                 res_msg['interface'] = tc_client.interface
                 res_msg['message'] = "invalid ip address"
