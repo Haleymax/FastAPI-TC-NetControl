@@ -1,6 +1,8 @@
 from fastapi import APIRouter, HTTPException, Query
 
 from app.core.settings import NETWORK_INTERFACE
+from app.utils.generate_template import Template
+from fastapi.responses import HTMLResponse
 from app.utils.validation import check_tc_params
 from app.utils.TrafficControl import TrafficControl
 from app.utils.logger import logger
@@ -21,7 +23,8 @@ async def remove(device: str = Query(None, description="device ip address")) :
         tc_client = TrafficControl(NETWORK_INTERFACE)
         result = tc_client.clear_tc(device)
         res_msg["success"] = True
-        res_msg["msg"] = result
+        res_msg["interface"] = tc_client.interface
+        res_msg["message"] = result
         return res_msg
     except Exception as e:
         logger.error(f"Traffic control setup failed: {e}")
@@ -40,6 +43,7 @@ async def base_api(tc_data: Base):
             tc_client = TrafficControl(NETWORK_INTERFACE)
             result = tc_client.set_network(tc_data.rate, tc_data.loss, tc_data.ipaddr)
             res_msg["result"] = True
+            res_msg["interface"] = tc_client.interface
             res_msg["message"] = result
         except Exception as e:
             logger.error(f"Traffic control setup failed: {e}")
@@ -48,3 +52,10 @@ async def base_api(tc_data: Base):
         res_msg["result"] = False
         res_msg["message"] = message
     return res_msg
+
+@tc_router.get("/tc/show", response_class=HTMLResponse)
+async def show():
+    tc_client = TrafficControl(NETWORK_INTERFACE)
+    data = tc_client.show_tc_config()
+    page = Template(data=data)
+    return page.generate()
