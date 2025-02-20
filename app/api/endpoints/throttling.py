@@ -44,7 +44,7 @@ async def remove(device: str = Query(None, description="device ip address"), red
             res_msg['message'] = "no device is set up"
             return res_msg
 
-        if device and is_ip_exist(redis_client, REDIS_HOST_KEY, device):
+        if device and not is_ip_exist(redis_client, REDIS_HOST_KEY, device):
             res_msg['result'] = False
             res_msg['interface'] = tc_client.interface
             res_msg['message'] = "device not set up"
