@@ -3,7 +3,7 @@ from fastapi import APIRouter, HTTPException, Query
 from fastapi.params import Depends
 
 from app.api.middleware import is_ip_exist, is_list_empty, clear_all_values
-from app.core.settings import NETWORK_INTERFACE, REDIS_HOST_KEY
+from app.core.settings import NETWORK_INTERFACE, REDIS_HOST_KEY, TC_DATABASE
 from app.utils.generate_template import Template
 from fastapi.responses import HTMLResponse
 
@@ -55,7 +55,7 @@ async def remove(device: str = Query(None, description="device ip address"), red
         res_msg["interface"] = tc_client.interface
         res_msg["message"] = result
         if device :
-            redis_client.lpop(REDIS_HOST_KEY)
+            redis_client.lrem(REDIS_HOST_KEY, TC_DATABASE, device)
         else:
             clear_all_values(redis_client, REDIS_HOST_KEY)
         return res_msg
