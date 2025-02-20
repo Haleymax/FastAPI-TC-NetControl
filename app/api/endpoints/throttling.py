@@ -2,7 +2,7 @@ import redis
 from fastapi import APIRouter, HTTPException, Query
 from fastapi.params import Depends
 
-from app.api.middleware import is_ip_exist, is_list_empty
+from app.api.middleware import is_ip_exist, is_list_empty, clear_all_values
 from app.core.settings import NETWORK_INTERFACE, REDIS_HOST_KEY
 from app.utils.generate_template import Template
 from fastapi.responses import HTMLResponse
@@ -44,7 +44,7 @@ async def remove(device: str = Query(None, description="device ip address"), red
             res_msg['message'] = "no device is set up"
             return res_msg
 
-        if not is_ip_exist(redis_client, REDIS_HOST_KEY, device):
+        if device and is_ip_exist(redis_client, REDIS_HOST_KEY, device):
             res_msg['result'] = False
             res_msg['interface'] = tc_client.interface
             res_msg['message'] = "device not set up"
@@ -54,7 +54,10 @@ async def remove(device: str = Query(None, description="device ip address"), red
         res_msg["result"] = True
         res_msg["interface"] = tc_client.interface
         res_msg["message"] = result
-        redis_client.lpop(REDIS_HOST_KEY, device)
+        if device :
+            redis_client.lpop(REDIS_HOST_KEY, device)
+        else:
+            clear_all_values(redis_client, REDIS_HOST_KEY)
         return res_msg
     except Exception as e:
         logger.error(f"Traffic control setup failed: {e}")
@@ -81,7 +84,7 @@ async def base_api(tc_data: Base, redis_client: redis.Redis= Depends(get_redis_c
             res_msg["result"] = True
             res_msg["interface"] = tc_client.interface
             res_msg["message"] = result
-            redis_client.lpush(REDIS_HOST_KEY, tc_data.rate)
+            redis_client.lpush(REDIS_HOST_KEY, tc_data.ipaddr)
         except Exception as e:
             logger.error(f"Traffic control setup failed: {e}")
             raise HTTPException(status_code=500, detail=f"Traffic control setup failed: {e}")

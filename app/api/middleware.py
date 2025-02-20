@@ -1,6 +1,3 @@
-import redis
-
-from app.core.settings import get_redis_config
 
 
 def is_ip_exist(redis_client, key, ip):
@@ -11,3 +8,12 @@ def is_ip_exist(redis_client, key, ip):
 
 def is_list_empty(redis_client, key):
     return redis_client.llen(key)==0
+
+def clear_all_values(redis_client, key):
+    try:
+        while True:
+            element = redis_client.lpop(key)
+            if element is None:
+                break
+    except Exception as e:
+        print(f"Redis operation error: {e}")
