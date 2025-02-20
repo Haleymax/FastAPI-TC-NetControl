@@ -21,7 +21,7 @@ async def add(tc_data: TC):
     return res_msg
 
 @tc_router.get("/tc/remove")
-async def remove(device: str = Query(None, description="device ip address"), redis_client: redis.Redis= Depends(get_redis_client())) :
+async def remove(device: str = Query(None, description="device ip address"), redis_client: redis.Redis= Depends(get_redis_client)) :
     """
     移除弱网配置，若传递了device参数就移除指定设备的弱网配置信息，没有就移除全局的配置信息
     :param redis_client: redis client
@@ -62,7 +62,7 @@ async def remove(device: str = Query(None, description="device ip address"), red
 
 
 @tc_router.post("/tc")
-async def base_api(tc_data: Base, redis_client: redis.Redis= Depends(get_redis_client())):
+async def base_api(tc_data: Base, redis_client: redis.Redis= Depends(get_redis_client)):
     """
     添加弱网配置
     :param tc_data: fastapi接收的数据模型
