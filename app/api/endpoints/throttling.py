@@ -55,7 +55,7 @@ async def remove(device: str = Query(None, description="device ip address"), red
         res_msg["interface"] = tc_client.interface
         res_msg["message"] = result
         if device :
-            redis_client.lpop(REDIS_HOST_KEY, device)
+            redis_client.lpop(REDIS_HOST_KEY)
         else:
             clear_all_values(redis_client, REDIS_HOST_KEY)
         return res_msg
