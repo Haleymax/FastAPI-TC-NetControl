@@ -1,5 +1,6 @@
 import subprocess
 
+from app.utils.format_conversion import str_to_dict
 from app.utils.logger import logger
 
 
@@ -76,7 +77,7 @@ class TrafficControl:
             )
             output = process_result.stdout
             logger.info(f"TC configuration on interface {self.interface} result is {output}")
-            return output
+            return str_to_dict(output)
         except subprocess.CalledProcessError as e:
             logger.info(f"faild show tc config on interface {self.interface} as {e}")
-            return e.output
+            return str_to_dict(e.output)
