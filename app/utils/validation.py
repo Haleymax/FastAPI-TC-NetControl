@@ -1,6 +1,6 @@
 import ipaddress
 
-from app.model.models import Base
+from app.model.receive_models import Base
 
 
 def check_tc_params(tc: Base):
