@@ -40,7 +40,6 @@ class TrafficControl:
             return self.show_tc_config()
 
     def set_network(self, rate="512Kbit", loss=0, ipaddr="127.0.0.1"):
-        output = None
         try:
             command = [
                 "tcset", self.interface,
@@ -63,6 +62,31 @@ class TrafficControl:
         except Exception as e:
             logger.error(f"Unexpected error: {e}")
             raise
+        finally:
+            return self.show_tc_config()
+
+    def change_network(self, rate="512Kbit", loss=0, ipaddr="127.0.0.1"):
+        try:
+            command = [
+                "tcset", self.interface,
+                "--rate", rate,
+                "--loss", str(loss),
+                "--network", ipaddr,
+                "--overwrite"
+            ]
+            process_result = subprocess.run(
+                command,
+                capture_output=True,
+                text=True,
+                check=True
+            )
+            logger.info(f"Network configured: {command}")
+            logger.info(process_result.stdout)
+        except subprocess.CalledProcessError as e:
+            logger.error(f"Command failed: {e.cmd}\nError: {e.stderr}")
+            raise
+        except Exception as e:
+            logger.error(f"Unexpected error: {e}")
         finally:
             return self.show_tc_config()
 
