@@ -82,6 +82,36 @@ async def base_api(tc_data: Base, redis_client: redis.Redis= Depends(get_redis_c
             message = f"unable to set weak network configuration for ip {tc_data.ipaddr}, because the ip address already exists"
     return TCResponse(result=False, interface=None, message=message)
 
+@tc_router.post("/tc/update", response_model=TCResponse)
+async def overwrite(tc_data: Base, redis_client: redis.Redis= Depends(get_redis_client)):
+    """
+    覆盖弱网配置
+    :param tc_data:接受的参数
+    :param redis_client: redis
+    :return: 将相应数据返回给前端
+    """
+    result, message = check_tc_params(tc_data)
+    is_exist = is_ip_exist(redis_client, tc_data.ipaddr)
+    if result :
+        if not is_exist:
+            message = f"ip address {tc_data.ipaddr} don't exist"
+            return TCResponse(result=False, interface=tc_data.interface, message=message)
+        logger.info(f"ip address {tc_data.ipaddr} exist")
+        logger.info(f"带宽为 {tc_data.rate}")
+        logger.info(f"丢包率为 {tc_data.loss}")
+        try:
+            tc_client = TrafficControl(NETWORK_INTERFACE)
+            result = tc_client.change_network(tc_data.rate, tc_data.loss, tc_data.ipaddr)
+            return TCResponse(result=True, interface=tc_client.interface, message=result)
+        except Exception as e:
+            logger.error(f"Traffic control setup failed: {e}")
+            message = f"Traffic control setup failed: {e}"
+            return TCResponse(result=False, interface=None, message=message)
+    else:
+        message = "parameter is not legal"
+        return TCResponse(result=False, interface=None, message=message)
+
+    
 @tc_router.get("/tc/show", response_class=HTMLResponse)
 async def show():
     """
