@@ -8,3 +8,4 @@ app/utils/__pycache__
 app/views/__pycache__
 .idea
 *.pyc
+testing/output
