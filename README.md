@@ -1,8 +1,10 @@
 # 基于 FastAPI 控制Linux tc实现弱网控制
 
 ## 1. 项目概述
-通过 FastAPI 框架搭建一个web服务，通过提供接口实现对 Linux 系统
+* 通过 FastAPI 框架搭建一个web服务，通过提供接口实现对 Linux 系统
 中 tc(traffic control) 工具对调用，实现对特定网卡进行弱网控制
+* 针对这个项目编写了一个简易的api测试框架在`testing`文件中
+
 ## 2. 环境要求
 1. **操作系统**：Linux（推荐Ubuntu 20.02 及以上版本 ）
 2. **Python版本**：Python 3.8 以上

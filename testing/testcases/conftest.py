@@ -6,5 +6,5 @@ def pytest_addoption(parser):
     )
 
 @pytest.fixture(scope="session")
-def get_api(pytestconfig):
+def get_case_num(pytestconfig):
     return pytestconfig.getoption("--case_num")

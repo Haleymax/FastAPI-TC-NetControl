@@ -3,6 +3,7 @@ import pytest
 
 
 from app.utils.logger import logger
+from testing.core.sender import Sender
 from testing.testcases.test_tc.conftest import post_data, URL
 
 
@@ -16,4 +17,12 @@ class TestRunApiTC:
         logger.info("run api test")
         url = URL
         logger.info(f"rate: {rate}, loss: {loss} ipaddr: {ip}")
-        assert 1==1
+        post_data = {
+            "rate": rate,
+            "loss": loss,
+            "ipaddr": ip,
+        }
+        sender = Sender()
+        sender.post(url, post_data)
+        assert sender.check_status(), f"与服务器连接失败"
+        assert sender.check_parameters(rate=rate, loss=loss, ipaddress=ip), f"所设置的数据{rate}, {loss}, {ip}并没有设置成功"
