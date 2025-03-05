@@ -24,5 +24,6 @@ class TestRunApiTC:
         }
         sender = Sender()
         sender.post(url, post_data)
+        allure.attach(sender.result, name="返回结果", attachment_type=allure.attachment_type.TEXT)
         assert sender.check_status(), f"与服务器连接失败"
         assert sender.check_parameters(rate=rate, loss=loss, ipaddress=ip), f"所设置的数据{rate}, {loss}, {ip}并没有设置成功"
